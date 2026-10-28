@@ -34,7 +34,7 @@ def busca():
                 "cpf_mascarado": mascarar_cpf(cpf)
             }), 200
         return jsonify({"status": "erro", "mensagem": "CPF Invalido"}), 400
-    return render_template('busca.html')
+    return render_template('index.html')
 
 @app.route('/estoque/painel-peps', methods=['GET', 'POST'])
 def estoque():

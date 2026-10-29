@@ -28,14 +28,13 @@ ESTOQUE_PEPS = [
     {"id": 102, "item": "Leite Integral 1L", "quantidade": 1, "validade": "2026-11-05"},
     {"id": 103, "item": "Óleo de Soja 900ml", "quantidade": 8, "validade": "2026-11-10"},
     {"id": 104, "item": "Arroz Agulhinha 5kg", "quantidade": 20, "validade": "2026-11-15"},
-    {"id": 105, "item": "Macarrão Espaguete 500g", "quantidade": 12, "validade": "2026-12-01"}
+    {"id": 105, "item": "Panetone 500g (Item Especial)", "quantidade": 5, "validade": "2026-12-25"}
 ]
 
 def extrair_apenas_digitos(cpf):
     return ''.join(filter(str.isdigit, str(cpf)))
 
 def processar_status_estoque(estoque_lista):
-    """Classifica se o lote está Vencido, Crítico (vence hoje) ou Valido."""
     hoje = date.today()
     estoque_processado = []
     
@@ -67,7 +66,9 @@ def busca():
     if len(cpf_limpo) != 11:
         return render_template('index.html', erro="CPF inválido. Digite os 11 números.")
     
-    estoque_validos = [item for item in ESTOQUE_PEPS if datetime.strptime(item['validade'], '%Y-%m-%d').date() >= date.today()]
+    # Filtra apenas itens válidos para doação
+    hoje = date.today()
+    estoque_validos = [item for item in ESTOQUE_PEPS if datetime.strptime(item['validade'], '%Y-%m-%d').date() >= hoje]
     
     if cpf_limpo in ASSISTIDOS_DB:
         assistido = ASSISTIDOS_DB[cpf_limpo]
@@ -78,6 +79,7 @@ def busca():
 @app.route('/atendimentos/confirmar', methods=['POST'])
 def confirmar_entrega():
     cpf_limpo = request.form.get('cpf_limpo', '')
+    item_extra_id = request.form.get('item_extra')
     
     if cpf_limpo in ASSISTIDOS_DB:
         assistido = ASSISTIDOS_DB[cpf_limpo]
@@ -90,7 +92,7 @@ def confirmar_entrega():
             "data_ultimo_recebimento": datetime.now().strftime("%d/%m/%Y às %H:%M")
         }
 
-    # Baixa no primeiro lote VÁLIDO do estoque
+    # 1. Baixa no primeiro lote PEPS prioritário (da Cesta)
     hoje = date.today()
     item_baixado = "Cesta Básica Completa"
     for i, lote in enumerate(ESTOQUE_PEPS):
@@ -102,7 +104,18 @@ def confirmar_entrega():
                 ESTOQUE_PEPS.pop(i)
             break
 
-    return render_template('sucesso.html', assistido=assistido, item_baixado=item_baixado)
+    # 2. Baixa no item extra selecionado (se houver)
+    nome_item_extra = None
+    if item_extra_id:
+        for i, lote in enumerate(ESTOQUE_PEPS):
+            if str(lote['id']) == str(item_extra_id):
+                nome_item_extra = lote['item']
+                ESTOQUE_PEPS[i]['quantidade'] -= 1
+                if ESTOQUE_PEPS[i]['quantidade'] <= 0:
+                    ESTOQUE_PEPS.pop(i)
+                break
+
+    return render_template('sucesso.html', assistido=assistido, item_baixado=item_baixado, item_extra=nome_item_extra)
 
 @app.route('/estoque', methods=['GET', 'POST'])
 def estoque():
@@ -112,7 +125,6 @@ def estoque():
         qtd = request.form.get('quantidade')
         validade = request.form.get('data_validade')
         
-        # Se escolheu 'outro', usa o nome digitado manualmente
         item_final = outro_item.strip().title() if categoria == "outro" and outro_item else categoria
         
         if item_final and qtd and validade:

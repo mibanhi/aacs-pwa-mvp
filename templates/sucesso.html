@@ -35,10 +35,10 @@
 
             <div class="bg-light p-3 rounded text-start mb-4 border">
                 <h2 class="h6 fw-bold text-dark border-bottom pb-2 mb-2">📄 Recibo Digital do Atendimento</h2>
-                <p class="mb-1 text-dark small"><strong>Beneficiário:</strong> {{ assistido.nome if assistido else 'Maria Oliveira da Silva' }}</p>
-                <p class="mb-1 text-dark small"><strong>CPF (LGPD):</strong> {{ assistido.cpf_formatado if assistido else '***.456.789-**' }}</p>
-                <p class="mb-1 text-dark small"><strong>Data/Hora:</strong> {{ assistido.data_ultimo_recebimento if assistido else 'Agora' }}</p>
-                <p class="mb-0 text-dark small"><strong>Status de Liberação:</strong> <span class="badge bg-success">Registrado</span></p>
+                <p class="mb-1 text-dark small"><strong>Beneficiário:</strong> {{ assistido.nome }}</p>
+                <p class="mb-1 text-dark small"><strong>CPF (LGPD):</strong> {{ assistido.cpf_formatado }}</p>
+                <p class="mb-1 text-dark small"><strong>Data/Hora do Registro:</strong> {{ assistido.data_ultimo_recebimento }}</p>
+                <p class="mb-0 text-dark small"><strong>Status de Liberação:</strong> <span class="badge bg-success">Cota Entregue</span></p>
             </div>
 
             <div class="d-grid gap-2">

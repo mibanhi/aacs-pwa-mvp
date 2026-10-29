@@ -61,41 +61,36 @@
             <h2 class="h5 fw-bold text-dark border-bottom pb-2 mb-2">📦 Composição da Cesta Básica Familiar</h2>
             <p class="text-muted small mb-3">Itens inclusos para entrega imediata ao assistido:</p>
 
-            <ul class="list-group list-group-flush mb-4">
-                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                    <span>1x Feijão Carioca 1kg</span>
-                    <span class="badge bg-secondary">Item Padrão</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                    <span>1x Arroz Agulhinha 5kg</span>
-                    <span class="badge bg-secondary">Item Padrão</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                    <span>1x Óleo de Soja 900ml</span>
-                    <span class="badge bg-secondary">Item Padrão</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                    <span>1x Açúcar Refinado 1kg</span>
-                    <span class="badge bg-secondary">Item Padrão</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                    <span>1x Pacote Macarrão Espaguete 500g</span>
-                    <span class="badge bg-secondary">Item Padrão</span>
-                </li>
+            <ul class="list-group list-group-flush mb-4 small" style="max-height: 250px; overflow-y: auto;">
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Feijão Carioca 1kg</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Arroz Agulhinha 5kg</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Óleo de Soja 900ml</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Leite Integral 1L</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Farinha de Trigo 1kg</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Fubá de Milho 500g</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Farinha de Mandioca 500g</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Açúcar Refinado 1kg</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Sal Refinado 1kg</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Café em Pó 500g</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Molho de Tomate 300g</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Atum em Lata</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Milho Verde em Lata</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Ervilha em Lata</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Biscoito Salgado 170g</span><span class="badge bg-secondary">Padrão</span></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1"><span>1x Biscoito Doce 170g</span><span class="badge bg-secondary">Padrão</span></li>
 
-                {% if estoque %}
-                <!-- DESTAQUE DO LOTE PEPS UTILIZADO PARA DAR BAIXA -->
-                <li class="list-group-item bg-light p-3 my-2 rounded border border-warning">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-dark">⚠️ Baixa Automática de Estoque (PEPS)</strong>
-                        <span class="badge badge-peps">Prioridade Vencimento</span>
-                    </div>
-                    <div class="small text-secondary">
-                        Item debitado do lote prioritário: <strong>{{ estoque[0].item }}</strong> (Lote #{{ estoque[0].id }} - Vencimento: {{ estoque[0].validade }})
-                    </div>
-                </li>
-                {% endif %}
-            </ul>
+    {% if estoque %}
+    <li class="list-group-item bg-light p-3 my-2 rounded border border-warning">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <strong class="text-dark">⚠️ Baixa Automática no Estoque (PEPS)</strong>
+            <span class="badge badge-peps">Prioridade Vencimento</span>
+        </div>
+        <div class="small text-secondary">
+            Item debitado do lote prioritário: <strong>{{ estoque[0].item }}</strong> (Lote #{{ estoque[0].id }} - Vencimento: {{ estoque[0].validade }})
+        </div>
+    </li>
+    {% endif %}
+</ul>
 
             {% if not assistido.recebeu_este_mes and estoque %}
             <form action="/atendimentos/confirmar" method="POST">

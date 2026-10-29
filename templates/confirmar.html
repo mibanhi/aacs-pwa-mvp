@@ -27,6 +27,17 @@
 
     <main class="container mb-5" style="max-width: 550px;">
 
+        {% if assistido.recebeu_este_mes %}
+        <!-- ALERTA DE BENEFÍCIO BARRADO -->
+        <div class="alert alert-danger d-flex align-items-center gap-3 p-3 mb-4 rounded-3 shadow-sm" role="alert">
+            <span class="fs-2">🚫</span>
+            <div>
+                <strong class="d-block fs-5">ENTREGA NÃO AUTORIZADA</strong>
+                <span class="small">Cesta básica já retirada este mês em: {{ assistido.data_ultimo_recebimento }}.</span>
+            </div>
+        </div>
+        {% else %}
+        <!-- ALERTA DE LIBERAÇÃO -->
         <div class="alert alert-success d-flex align-items-center gap-3 p-3 mb-4 rounded-3 shadow-sm" role="alert">
             <span class="fs-2">✅</span>
             <div>
@@ -34,39 +45,47 @@
                 <span class="small">Nenhum recebimento registrado no mês atual. Liberação autorizada.</span>
             </div>
         </div>
+        {% endif %}
 
+        <!-- DADOS DINÂMICOS DO ASSISTIDO -->
         <div class="card card-custom p-4 bg-white mb-4">
             <h1 class="h5 fw-bold text-dark border-bottom pb-2 mb-3">👤 Dados da Família Cadastrada</h1>
-            <p class="mb-2 text-dark"><strong>Responsável:</strong> Maria Oliveira da Silva</p>
-            <p class="mb-2 text-dark"><strong>CPF (Protegido LGPD):</strong> {{ cpf if cpf else '***.456.789-**' }}</p>
-            <p class="mb-0 text-dark"><strong>Dependentes Cadastrados:</strong> 4 pessoas</p>
+            <p class="mb-2 text-dark"><strong>Responsável:</strong> {{ assistido.nome }}</p>
+            <p class="mb-2 text-dark"><strong>CPF (Protegido LGPD):</strong> {{ assistido.cpf_formatado }}</p>
+            <p class="mb-0 text-dark"><strong>Dependentes Cadastrados:</strong> {{ assistido.dependentes }} pessoas</p>
         </div>
 
+        <!-- COMPOSIÇÃO REAL DO ESTOQUE PEPS -->
         <div class="card card-custom p-4 bg-white mb-4">
-            <h2 class="h5 fw-bold text-dark border-bottom pb-2 mb-3">📦 Composição da Cesta Básica (Baixa PEPS)</h2>
-            <p class="text-muted small mb-3">Itens selecionados automaticamente com base na validade mais próxima:</p>
+            <h2 class="h5 fw-bold text-dark border-bottom pb-2 mb-3">📦 Item Prioritário para Saída (PEPS)</h2>
+            <p class="text-muted small mb-3">Item selecionado automaticamente por ter o vencimento mais próximo:</p>
 
             <ul class="list-group list-group-flush mb-4">
                 {% if estoque %}
-                    {% for item in estoque %}
                     <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                         <div>
-                            <strong class="text-dark">1x {{ item.item }}</strong><br>
-                            <span class="small text-muted">Validade: {{ item.validade }}</span>
+                            <strong class="text-dark">1x {{ estoque[0].item }}</strong><br>
+                            <span class="small text-danger fw-bold">Validade: {{ estoque[0].validade }}</span>
                         </div>
-                        <span class="badge bg-warning text-dark">Lote #{{ item.id }}</span>
+                        <span class="badge bg-warning text-dark">Lote #{{ estoque[0].id }} ({{ estoque[0].quantidade }} un. restantes)</span>
                     </li>
-                    {% endfor %}
                 {% else %}
                     <li class="list-group-item text-muted px-0">Sem lotes disponíveis no estoque.</li>
                 {% endif %}
             </ul>
 
+            {% if not assistido.recebeu_este_mes and estoque %}
             <form action="/atendimentos/confirmar" method="POST">
+                <input type="hidden" name="cpf_limpo" value="{{ cpf_limpo }}">
                 <button type="submit" class="btn btn-success w-100 touch-target d-flex align-items-center justify-content-center gap-2">
                     ✅ CONFIRMAR ENTREGA E DAR BAIXA NO ESTOQUE
                 </button>
             </form>
+            {% elif assistido.recebeu_este_mes %}
+            <button class="btn btn-secondary w-100 touch-target" disabled>
+                🔒 ENTREGA BLOQUEADA (COTA DO MÊS UTILIZADA)
+            </button>
+            {% endif %}
         </div>
 
     </main>

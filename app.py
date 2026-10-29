@@ -56,19 +56,24 @@ def busca():
 @app.route('/atendimentos/confirmar', methods=['POST'])
 def confirmar_entrega():
     cpf_limpo = request.form.get('cpf_limpo')
+    assistido = None
     
     # 1. Bloqueia novas entregas para o assistido no mês atual
     if cpf_limpo in ASSISTIDOS_DB:
         ASSISTIDOS_DB[cpf_limpo]['recebeu_este_mes'] = True
         ASSISTIDOS_DB[cpf_limpo]['data_ultimo_recebimento'] = datetime.now().strftime("%d/%m/%Y às %H:%M")
+        assistido = ASSISTIDOS_DB[cpf_limpo]
 
     # 2. Processa a baixa real no lote prioritário do estoque PEPS
+    item_baixado = None
     if ESTOQUE_PEPS:
+        item_baixado = ESTOQUE_PEPS[0]['item']
         ESTOQUE_PEPS[0]['quantidade'] -= 1
         if ESTOQUE_PEPS[0]['quantidade'] <= 0:
             ESTOQUE_PEPS.pop(0)
 
-    return redirect(url_for('estoque'))
+    # Renderiza a Tela 3 (Sucesso) em vez de redirecionar para o estoque
+    return render_template('sucesso.html', assistido=assistido, item_baixado=item_baixado)
 
 @app.route('/estoque', methods=['GET', 'POST'])
 def estoque():

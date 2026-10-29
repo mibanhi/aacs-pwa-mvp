@@ -79,12 +79,17 @@
             <form action="/atendimentos/confirmar" method="POST">
                 <input type="hidden" name="cpf_limpo" value="{{ cpf_limpo }}">
 
-                <!-- CHECKBOX PRÁTICO E ACESSÍVEL PARA ITEM EXTRA -->
-                <div class="form-check form-switch mb-4 p-3 bg-light rounded border">
-                    <input class="form-check-input ms-0 me-2" type="checkbox" id="incluir_extra" name="incluir_extra" value="sim" style="transform: scale(1.3);">
-                    <label class="form-check-label fw-bold text-dark small" for="incluir_extra">
-                        🎁 Incluir +1 Item Adicional Prioritário do Estoque na Doação
+                <!-- SELEÇÃO VISUAL CLARA DO ITEM ADICIONAL -->
+                <div class="mb-4 p-3 bg-light rounded border">
+                    <label for="item_extra" class="form-label fw-bold text-dark small">
+                        🎁 Incluir Item Avulso do Estoque à Doação (Opcional):
                     </label>
+                    <select class="form-select form-select-lg" id="item_extra" name="item_extra">
+                        <option value="" selected>Nenhum item extra (Apenas a Cesta)</option>
+                        {% for item in estoque %}
+                        <option value="{{ item.id }}">+ 1x {{ item.item }} (Lote #{{ item.id }} - Val: {{ item.validade }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <button type="submit" class="btn btn-success w-100 touch-target d-flex align-items-center justify-content-center gap-2">

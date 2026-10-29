@@ -18,7 +18,7 @@ ASSISTIDOS_DB = {
         "cpf_formatado": "***.654.321-**",
         "dependentes": 2,
         "recebeu_este_mes": True,
-        "data_ultimo_recebimento": "15/10/2026"
+        "data_ultimo_recebimento": "15/10/2026 às 14:30"
     }
 }
 
@@ -47,29 +47,24 @@ def busca():
     if len(cpf_limpo) != 11:
         return render_template('index.html', erro="CPF inválido. Digite os 11 números.")
     
-    # Verifica se o CPF está cadastrado
     if cpf_limpo in ASSISTIDOS_DB:
         assistido = ASSISTIDOS_DB[cpf_limpo]
         return render_template('confirmar.html', assistido=assistido, cpf_limpo=cpf_limpo, estoque=ESTOQUE_PEPS)
     
-    # Se o CPF não for encontrado no cadastro
     return render_template('index.html', erro=f"CPF {cpf_bruto} não encontrado no cadastro da AACS. Solicite o recadastramento.")
 
 @app.route('/atendimentos/confirmar', methods=['POST'])
 def confirmar_entrega():
     cpf_limpo = request.form.get('cpf_limpo')
     
-    # 1. Atualiza o status do assistido para BLOQUEAR nova entrega no mês
+    # 1. Bloqueia novas entregas para o assistido no mês atual
     if cpf_limpo in ASSISTIDOS_DB:
         ASSISTIDOS_DB[cpf_limpo]['recebeu_este_mes'] = True
         ASSISTIDOS_DB[cpf_limpo]['data_ultimo_recebimento'] = datetime.now().strftime("%d/%m/%Y às %H:%M")
 
-    # 2. Processa a baixa dos itens no Estoque PEPS
+    # 2. Processa a baixa real no lote prioritário do estoque PEPS
     if ESTOQUE_PEPS:
-        # Dá baixa de 1 unidade no primeiro item prioritário
         ESTOQUE_PEPS[0]['quantidade'] -= 1
-        
-        # Limpa da lista se a quantidade chegar a zero
         if ESTOQUE_PEPS[0]['quantidade'] <= 0:
             ESTOQUE_PEPS.pop(0)
 
@@ -85,7 +80,7 @@ def estoque():
         if item and qtd and validade:
             novo_lote = {
                 "id": len(ESTOQUE_PEPS) + 101,
-                "item": item.title(),
+                "item": item,
                 "quantidade": int(qtd),
                 "validade": validade
             }

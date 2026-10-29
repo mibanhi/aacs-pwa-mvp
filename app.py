@@ -77,7 +77,7 @@ def busca():
 @app.route('/atendimentos/confirmar', methods=['POST'])
 def confirmar_entrega():
     cpf_limpo = request.form.get('cpf_limpo', '')
-    incluir_extra = request.form.get('incluir_extra')
+    item_extra_id = request.form.get('item_extra')
     
     if cpf_limpo in ASSISTIDOS_DB:
         assistido = ASSISTIDOS_DB[cpf_limpo]
@@ -90,7 +90,7 @@ def confirmar_entrega():
             "data_ultimo_recebimento": datetime.now().strftime("%d/%m/%Y às %H:%M")
         }
 
-    # 1. Baixa no primeiro lote PEPS da Cesta Básica
+    # 1. Baixa no lote PEPS da Cesta
     hoje = date.today()
     item_baixado = "Cesta Básica Completa"
     for i, lote in enumerate(ESTOQUE_PEPS):
@@ -102,12 +102,11 @@ def confirmar_entrega():
                 ESTOQUE_PEPS.pop(i)
             break
 
-    # 2. Baixa no Item Adicional se o voluntário marcou a caixinha
+    # 2. Baixa no Item Extra Selecionado pelo Voluntário
     nome_item_extra = None
-    if incluir_extra and ESTOQUE_PEPS:
+    if item_extra_id:
         for i, lote in enumerate(ESTOQUE_PEPS):
-            data_val = datetime.strptime(lote['validade'], '%Y-%m-%d').date()
-            if data_val >= hoje:
+            if str(lote['id']) == str(item_extra_id):
                 nome_item_extra = lote['item']
                 ESTOQUE_PEPS[i]['quantidade'] -= 1
                 if ESTOQUE_PEPS[i]['quantidade'] <= 0:

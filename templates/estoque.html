@@ -9,9 +9,10 @@
         body { background-color: #f8f9fa; font-family: system-ui, -apple-system, sans-serif; }
         .touch-target { min-height: 52px; font-size: 1.1rem; font-weight: 600; }
         .form-control-lg, .form-select-lg { min-height: 50px; font-size: 1.1rem; }
-        .card-peps-alert { border-left: 8px solid #fd7e14; background-color: #fff3cd; }
-        .card-peps-vencido { border-left: 8px solid #dc3545; background-color: #f8d7da; }
+        .card-peps-alert { border-left: 6px solid #fd7e14 !important; background-color: #fff3cd; }
+        .card-peps-vencido { border-left: 6px solid #dc3545 !important; background-color: #f8d7da; }
         .card-custom { border-radius: 12px; border: 1px solid #dee2e6; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .badge-responsive { font-size: 0.8rem; white-space: normal; text-align: left; line-height: 1.2; }
     </style>
 </head>
 <body>
@@ -61,7 +62,7 @@
 
                 <div class="mb-3 d-none" id="div_outro">
                     <label for="outro_item" class="form-label fw-bold text-primary">Nome do Item Inesperado:</label>
-                    <input type="text" class="form-control form-control-lg border-primary" id="outro_item" name="outro_item" placeholder="Ex: Panetone 500g, Fralda P, etc.">
+                    <input type="text" class="form-control form-control-lg border-primary" id="outro_item" name="outro_item" placeholder="Ex: Panetone 500g, Sabonete, etc.">
                 </div>
 
                 <div class="mb-3">
@@ -88,34 +89,34 @@
                 
                 {% if item.status_validade == 'VENCIDO' %}
                 <div class="card card-peps-vencido p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <span class="fw-bold text-dark fs-5">{{ item.item }}</span>
-                        <span class="badge bg-danger text-white fs-6">⛔ VENCIDO (Descarte)</span>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <span class="fw-bold text-dark fs-5 text-break mb-0" style="max-width: 60%;">{{ item.item }}</span>
+                        <span class="badge bg-danger text-white badge-responsive">⛔ VENCIDO (Descarte)</span>
                     </div>
-                    <p class="mb-1 text-dark"><strong>Lote:</strong> #{{ item.id }} | <strong>Quantidade:</strong> {{ item.quantidade }} un.</p>
-                    <p class="mb-0 text-danger fw-bold">📅 Validade: {{ item.validade }} (Item Bloqueado para Doação)</p>
+                    <p class="mb-1 text-dark small"><strong>Lote:</strong> #{{ item.id }} | <strong>Quantidade:</strong> {{ item.quantidade }} un.</p>
+                    <p class="mb-0 text-danger fw-bold small">📅 Validade: {{ item.validade }} (Item Bloqueado)</p>
                 </div>
 
                 {% elif item.status_validade == 'CRITICO' %}
                 <div class="card card-peps-alert p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <span class="fw-bold text-dark fs-5">{{ item.item }}</span>
-                        <span class="badge bg-warning text-dark fs-6">⚠️ Urgente PEPS (Prioridade MÁX)</span>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <span class="fw-bold text-dark fs-5 text-break mb-0" style="max-width: 60%;">{{ item.item }}</span>
+                        <span class="badge bg-warning text-dark badge-responsive">⚠️ Urgente PEPS</span>
                     </div>
-                    <p class="mb-1 text-dark"><strong>Lote:</strong> #{{ item.id }} | <strong>Quantidade:</strong> {{ item.quantidade }} un.</p>
-                    <p class="mb-0 text-danger fw-bold">
+                    <p class="mb-1 text-dark small"><strong>Lote:</strong> #{{ item.id }} | <strong>Quantidade:</strong> {{ item.quantidade }} un.</p>
+                    <p class="mb-0 text-danger fw-bold small">
                         📅 Validade: {{ item.validade }} {% if item.dias_para_vencer == 0 %}(VENCE HOJE!){% else %}(Vence em {{ item.dias_para_vencer }} dias){% endif %}
                     </p>
                 </div>
 
                 {% else %}
                 <div class="card border-start border-4 border-info p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <span class="fw-bold text-dark fs-5">{{ item.item }}</span>
-                        <span class="badge bg-info text-dark fs-6">Lote na Fila</span>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <span class="fw-bold text-dark fs-5 text-break mb-0" style="max-width: 65%;">{{ item.item }}</span>
+                        <span class="badge bg-info text-dark badge-responsive">Lote na Fila</span>
                     </div>
-                    <p class="mb-1 text-dark"><strong>Lote:</strong> #{{ item.id }} | <strong>Quantidade:</strong> {{ item.quantidade }} un.</p>
-                    <p class="mb-0 text-dark">📅 Validade: {{ item.validade }}</p>
+                    <p class="mb-1 text-dark small"><strong>Lote:</strong> #{{ item.id }} | <strong>Quantidade:</strong> {{ item.quantidade }} un.</p>
+                    <p class="mb-0 text-dark small">📅 Validade: {{ item.validade }}</p>
                 </div>
                 {% endif %}
 

@@ -1,26 +1,39 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aacs-chave-secreta-lgpd-2026'
 
-# Banco de dados temporário em memória (Estoque PEPS)
+# 1. BASE DE DADOS SIMULADA DE ASSISTIDOS (Com controle de elegibilidade)
+ASSISTIDOS_DB = {
+    "12345678900": {
+        "nome": "Maria Oliveira da Silva",
+        "cpf_formatado": "***.456.789-**",
+        "dependentes": 4,
+        "recebeu_este_mes": False,
+        "data_ultimo_recebimento": None
+    },
+    "98765432111": {
+        "nome": "João Pedro Santos",
+        "cpf_formatado": "***.654.321-**",
+        "dependentes": 2,
+        "recebeu_este_mes": True,
+        "data_ultimo_recebimento": "15/10/2026"
+    }
+}
+
+# 2. ESTOQUE PEPS EXPANDIDO (Ordenação automática por vencimento)
 ESTOQUE_PEPS = [
     {"id": 101, "item": "Feijão Carioca 1kg", "quantidade": 15, "validade": "2026-11-02"},
-    {"id": 102, "item": "Arroz Agulhinha 5kg", "quantidade": 20, "validade": "2026-11-15"}
+    {"id": 102, "item": "Leite Integral 1L", "quantidade": 1, "validade": "2026-11-05"},
+    {"id": 103, "item": "Óleo de Soja 900ml", "quantidade": 8, "validade": "2026-11-10"},
+    {"id": 104, "item": "Arroz Agulhinha 5kg", "quantidade": 20, "validade": "2026-11-15"},
+    {"id": 105, "item": "Macarrão Espaguete 500g", "quantidade": 12, "validade": "2026-12-01"},
+    {"id": 106, "item": "Farinha de Trigo 1kg", "quantidade": 10, "validade": "2026-12-20"}
 ]
 
-def mascarar_cpf(cpf):
-    """Aplica máscara LGPD no CPF: ***.456.789-**"""
-    digits = ''.join(filter(str.isdigit, str(cpf)))
-    if len(digits) == 11:
-        return f"***.{digits[3:6]}.{digits[6:9]}-**"
-    return cpf
-
-def validar_cpf(cpf):
-    """Valida se o CPF possui 11 dígitos numéricos"""
-    digits = ''.join(filter(str.isdigit, str(cpf)))
-    return len(digits) == 11
+def extrair_apenas_digitos(cpf):
+    return ''.join(filter(str.isdigit, str(cpf)))
 
 @app.route('/')
 def index():
@@ -28,17 +41,41 @@ def index():
 
 @app.route('/atendimentos/busca', methods=['POST'])
 def busca():
-    cpf = request.form.get('cpf', '')
-    if validar_cpf(cpf):
-        cpf_formatado = mascarar_cpf(cpf)
-        # Renderiza a página de confirmação com os dados do assistido
-        return render_template('confirmar.html', cpf=cpf_formatado, estoque=ESTOQUE_PEPS)
+    cpf_bruto = request.form.get('cpf', '')
+    cpf_limpo = extrair_apenas_digitos(cpf_bruto)
     
-    # Se CPF for inválido, recarrega a busca com mensagem de erro
-    return render_template('index.html', erro="CPF inválido. Digite 11 números.")
+    if len(cpf_limpo) != 11:
+        return render_template('index.html', erro="CPF inválido. Digite os 11 números.")
+    
+    # Verifica se o CPF está cadastrado
+    if cpf_limpo in ASSISTIDOS_DB:
+        assistido = ASSISTIDOS_DB[cpf_limpo]
+        return render_template('confirmar.html', assistido=assistido, cpf_limpo=cpf_limpo, estoque=ESTOQUE_PEPS)
+    
+    # Se o CPF não for encontrado no cadastro
+    return render_template('index.html', erro=f"CPF {cpf_bruto} não encontrado no cadastro da AACS. Solicite o recadastramento.")
+
+@app.route('/atendimentos/confirmar', methods=['POST'])
+def confirmar_entrega():
+    cpf_limpo = request.form.get('cpf_limpo')
+    
+    # 1. Atualiza o status do assistido para BLOQUEAR nova entrega no mês
+    if cpf_limpo in ASSISTIDOS_DB:
+        ASSISTIDOS_DB[cpf_limpo]['recebeu_este_mes'] = True
+        ASSISTIDOS_DB[cpf_limpo]['data_ultimo_recebimento'] = datetime.now().strftime("%d/%m/%Y às %H:%M")
+
+    # 2. Processa a baixa dos itens no Estoque PEPS
+    if ESTOQUE_PEPS:
+        # Dá baixa de 1 unidade no primeiro item prioritário
+        ESTOQUE_PEPS[0]['quantidade'] -= 1
+        
+        # Limpa da lista se a quantidade chegar a zero
+        if ESTOQUE_PEPS[0]['quantidade'] <= 0:
+            ESTOQUE_PEPS.pop(0)
+
+    return redirect(url_for('estoque'))
 
 @app.route('/estoque', methods=['GET', 'POST'])
-@app.route('/estoque/painel-peps', methods=['GET', 'POST'])
 def estoque():
     if request.method == 'POST':
         item = request.form.get('categoria') or request.form.get('item')
@@ -53,20 +90,10 @@ def estoque():
                 "validade": validade
             }
             ESTOQUE_PEPS.append(novo_lote)
-            # Ordenação PEPS: Validade mais próxima primeiro
+            # Ordenação PEPS imediata
             ESTOQUE_PEPS.sort(key=lambda x: datetime.strptime(x['validade'], '%Y-%m-%d'))
             
     return render_template('estoque.html', estoque=ESTOQUE_PEPS)
-
-@app.route('/atendimentos/confirmar', methods=['POST'])
-def confirmar_entrega():
-    if ESTOQUE_PEPS:
-        # Baixa do primeiro lote da fila PEPS
-        ESTOQUE_PEPS[0]['quantidade'] -= 1
-        if ESTOQUE_PEPS[0]['quantidade'] <= 0:
-            ESTOQUE_PEPS.pop(0)
-            
-    return redirect(url_for('estoque'))
 
 @app.route('/logout')
 def logout():
